@@ -39,6 +39,7 @@ DISCORD_BOT_TOKEN=your_discord_bot_token
 OPENAI_API_KEY=your_openai_api_key
 WEAVIATE_URL=your_weaviate_url
 WEAVIATE_API_KEY=your_weaviate_api_key
+VOYAGE_API_KEY=your_voyage_api_key
 ```
 
 Then, run the bot with:
@@ -49,6 +50,34 @@ $ argus-discord
 
 The bot will listen to the specified Discord channels, save messages to Weaviate, and interact with the LLM as needed.
 
+## Deployment
+
+To deploy the bot, follow these steps:
+
+1. Ensure you have Ruby 3.0.0 or higher installed on your deployment server.
+
+2. Clone the repository:
+   ```
+   git clone https://github.com/chunky-metro/argus-discord.git
+   cd argus-discord
+   ```
+
+3. Install dependencies:
+   ```
+   bundle install
+   ```
+
+4. Set up environment variables:
+   - Create a `.env` file in the project root
+   - Add the required environment variables as shown in the Usage section
+
+5. Start the bot:
+   ```
+   bundle exec ruby -r './lib/argus/discord.rb' -e 'Argus::Discord::Bot.new.run'
+   ```
+
+6. (Optional) Use a process manager like systemd or supervisord to keep the bot running and restart it if it crashes.
+
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/argus-discord.
+Bug reports and pull requests are welcome on GitHub at https://github.com/chunky-metro/argus-discord.

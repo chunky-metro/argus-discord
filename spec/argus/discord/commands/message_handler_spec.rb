@@ -20,19 +20,35 @@ RSpec.describe Argus::Discord::Commands::MessageHandler do
 
     before do
       allow(event).to receive(:message).and_return(message)
+      allow(assistant).to receive(:process_message).with(message).and_return({importance: 0.5, embedding: [0.1, 0.2, 0.3]})
     end
 
-    it "saves the message and processes it" do
-      expect(database).to receive(:save_message).with(message)
-      expect(assistant).to receive(:process_message).with(message).and_return(0.5)
+    it "processes the message" do
+      expect(assistant).to receive(:process_message).with(message)
       handler.call(event)
     end
 
     context "when the message is important" do
+      before do
+        allow(assistant).to receive(:process_message).with(message).and_return({importance: 0.9, embedding: [0.1, 0.2, 0.3]})
+      end
+
       it "notifies about the important message" do
-        allow(database).to receive(:save_message)
-        allow(assistant).to receive(:process_message).and_return(0.9)
         expect(event).to receive(:respond).with("⚠️ Important announcement detected! ⚠️\nTest message")
+        handler.call(event)
+      end
+    end
+
+    context "when the message contains a project update" do
+      let(:message) { instance_double(Discordrb::Message, content: "Project: XYZ has launched a new feature") }
+
+      before do
+        allow(assistant).to receive(:analyze_project_update).and_return("Analysis of XYZ update")
+      end
+
+      it "analyzes the project update and sends the analysis" do
+        expect(assistant).to receive(:analyze_project_update).with("XYZ", "Project: XYZ has launched a new feature")
+        expect(event).to receive(:respond).with("📊 Project Update Analysis: XYZ 📊\n\nAnalysis of XYZ update")
         handler.call(event)
       end
     end

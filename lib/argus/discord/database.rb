@@ -18,25 +18,29 @@ module Argus
       end
 
       def save_message(message)
-        client.add_texts([message.content], metadata: message_metadata(message))
+        client.add_object(
+          class_name: "DiscordMessage",
+          properties: {
+            content: message.content,
+            channel_id: message.channel.id,
+            message_id: message.id,
+            created_at: message.timestamp.to_i
+          }
+        )
       end
 
       def query_messages(query, limit: 10)
-        client.similarity_search(query, k: limit)
+        client.query(
+          class_name: "DiscordMessage",
+          near_text: query,
+          limit: limit
+        )
       end
 
       private
 
-      def message_metadata(message)
-        {
-          channel_id: message.channel.id,
-          message_id: message.id,
-          created_at: message.timestamp.to_i
-        }
-      end
-
       def create_schema
-        client.create_schema(
+        client.create_class(
           class_name: "DiscordMessage",
           properties: [
             {name: "content", data_type: ["text"]},

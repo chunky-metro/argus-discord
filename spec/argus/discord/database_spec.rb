@@ -12,22 +12,42 @@ RSpec.describe Argus::Discord::Database do
     end
 
     it "creates the schema" do
-      expect(client).to receive(:create_schema)
+      expect(client).to receive(:create_class).with(
+        class_name: "DiscordMessage",
+        properties: [
+          {name: "content", data_type: ["text"]},
+          {name: "channel_id", data_type: ["int"]},
+          {name: "message_id", data_type: ["int"]},
+          {name: "created_at", data_type: ["int"]}
+        ]
+      )
       described_class.new(client: client)
     end
   end
 
   describe "#save_message" do
     it "saves a message to the database" do
-      message = instance_double("Discordrb::Message", content: "Test message", channel: double(id: 123), id: 456, timestamp: Time.now)
-      expect(client).to receive(:add_texts).with([message.content], hash_including(:metadata))
+      message = instance_double(Discordrb::Message, content: "Test message", channel: double(id: 123), id: 456, timestamp: Time.now)
+      expect(client).to receive(:add_object).with(
+        class_name: "DiscordMessage",
+        properties: {
+          content: "Test message",
+          channel_id: 123,
+          message_id: 456,
+          created_at: message.timestamp.to_i
+        }
+      )
       database.save_message(message)
     end
   end
 
   describe "#query_messages" do
     it "queries messages from the database" do
-      expect(client).to receive(:similarity_search).with("test query", k: 10)
+      expect(client).to receive(:query).with(
+        class_name: "DiscordMessage",
+        near_text: "test query",
+        limit: 10
+      ).and_return([])
       database.query_messages("test query")
     end
   end
