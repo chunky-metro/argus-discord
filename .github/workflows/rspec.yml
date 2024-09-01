@@ -1,0 +1,23 @@
+name: RSpec
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'  # This will use the latest stable Ruby 3.3.x version
+        bundler-cache: true
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      run: bundle exec rspec spec/
