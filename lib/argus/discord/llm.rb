@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
 require "langchain"
+require_relative "config"
 
 module Argus
   module Discord
     class LLM
       attr_reader :client, :embedder, :database
 
-      def initialize(client: nil, embedder: nil, database: nil)
-        @client = client || Langchain::LLM::OpenAI.new(api_key: ENV["OPENAI_API_KEY"])
-        @embedder = embedder || @client
-        @database = database || Database.new
+      def initialize
+        @client = Langchain::LLM::OpenAI.new(api_key: Config.openai_api_key)
+        @embedder = client
+        @database = Database.new
       end
 
       def embed(text)

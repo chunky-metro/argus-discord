@@ -12,7 +12,7 @@ module Argus
         end
 
         def call(event)
-          result = @assistant.process_message(event.message)
+          result = assistant.process_message(event.message)
           notify_if_important(event, result[:importance])
           analyze_project_update(event)
         end
@@ -28,13 +28,11 @@ module Argus
           project_name = extract_project_name(event.message.content)
           return unless project_name
 
-          analysis = @assistant.analyze_project_update(project_name, event.message.content)
+          analysis = assistant.analyze_project_update(project_name, event.message.content)
           send_analysis(event, project_name, analysis)
         end
 
         def extract_project_name(content)
-          # This is a simple implementation. You might want to use a more sophisticated method,
-          # such as named entity recognition or a custom regex pattern for your specific use case.
           match = content.match(/\b(?:Project|Protocol):\s*(\w+)/i)
           match ? match[1] : nil
         end
