@@ -4,11 +4,12 @@ module Argus
   module Discord
     module Commands
       class MessageHandler
-        attr_reader :database, :assistant
+        attr_reader :database, :assistant, :embedding_service
 
-        def initialize(database, assistant)
+        def initialize(database, assistant, embedding_service)
           @database = database
           @assistant = assistant
+          @embedding_service = embedding_service
         end
 
         def call(event)

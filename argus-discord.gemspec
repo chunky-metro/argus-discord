@@ -24,16 +24,17 @@ Gem::Specification.new do |spec|
       (File.expand_path(f) == __FILE__) || f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor])
     end
   end
-  spec.bindir = "exe"
-  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.bindir = "bin"
+  spec.executables = spec.files.grep(%r{\Abin/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "discordrb", "~> 3.4"
+  spec.add_dependency "discordrb", "~> 3.5"
   spec.add_dependency "dotenv", "~> 3.1"
-  spec.add_dependency "langchainrb", "~> 0.6"
-  spec.add_dependency "weaviate-ruby", "~> 0.8"
+  spec.add_dependency "ruby-openai", "~> 7.1"
+  spec.add_dependency "langchainrb", "~> 0.15.4"
+  spec.add_dependency "weaviate-ruby", "~> 0.9.0"
 
-  spec.add_development_dependency "rake", "~> 13.0"
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "standard", "~> 1.3"
+  spec.add_development_dependency "rake", "~> 13.2"
+  spec.add_development_dependency "rspec", "~> 3.13"
+  spec.add_development_dependency "standard", "~> 1.40"
 end

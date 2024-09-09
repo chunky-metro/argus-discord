@@ -1,1 +1,1 @@
-worker: bundle exec argus-discord
+worker: bin/argus

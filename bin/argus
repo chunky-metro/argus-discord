@@ -2,7 +2,9 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
+require "dotenv/load"
 require "argus/discord"
+require "openai"
 
 Argus::Discord::Config.load
 Argus::Discord.run
