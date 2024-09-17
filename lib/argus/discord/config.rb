@@ -6,9 +6,6 @@ module Argus
   module Discord
     class Config
       class << self
-        def load
-          Dotenv.load
-        end
 
         def discord_bot_token
           ENV["DISCORD_BOT_TOKEN"]
@@ -25,6 +22,7 @@ module Argus
         def weaviate_api_key
           ENV["WEAVIATE_API_KEY"]
         end
+
       end
     end
   end

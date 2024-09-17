@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "weaviate"
+
 require_relative "discord/version"
 require_relative "discord/config"
 require_relative "discord/bot"
@@ -14,8 +16,8 @@ module Argus
     class Error < StandardError; end
 
     def self.run
-      Config.load
       Bot.new.run
     end
   end
+
 end

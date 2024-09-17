@@ -15,6 +15,8 @@ module Argus
 
       def initialize
         @bot = Discordrb::Bot.new(token: Config.discord_bot_token)
+        puts "This bot's invite URL is #{bot.invite_url}"
+        puts 'Click on it to invite it to your server.'
         @database = Database.new
         @llm = LLM.new
         @assistant = Assistant.new(database, llm)
@@ -23,7 +25,6 @@ module Argus
       end
 
       def run
-        Logger.info("Starting Argus Discord bot...")
         handlers.setup
         bot.run
       end

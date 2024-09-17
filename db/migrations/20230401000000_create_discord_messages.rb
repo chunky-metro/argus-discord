@@ -1,33 +1,32 @@
-require "weaviate"
+require "argus/clients/weaviate"
+
+class NilClass
+  def present?
+    false
+  end
+end
 
 class CreateDiscordMessages
   def self.up
-    client = Weaviate::Client.new(
-      url: ENV["WEAVIATE_URL"],
-      api_key: ENV["WEAVIATE_API_KEY"]
-    )
+    client = Argus::Clients::Weaviate.client
 
-    schema = {
-      class: "DiscordMessage",
+    client.schema.create(
+      class_name: 'DiscordAnnouncementMessage',
+      description: 'A high-signal announcement from a Discord server',
       properties: [
-        { name: "content", dataType: ["text"] },
-        { name: "author", dataType: ["string"] },
-        { name: "channel", dataType: ["string"] },
-        { name: "timestamp", dataType: ["date"] },
-        { name: "guild", dataType: ["string"] }
+        { name: 'content', dataType: ['text'] },
+        { name: 'author', dataType: ['string'] },
+        { name: 'channel', dataType: ['string'] },
+        { name: 'timestamp', dataType: ['date'] },
+        { name: 'guild', dataType: ['string'] }
       ],
-      vectorizer: "text2vec-openai"
-    }
-
-    client.schema.create_class(schema)
+      vectorizer: 'text2vec-openai'
+    )
   end
 
   def self.down
-    client = Weaviate::Client.new(
-      url: ENV["WEAVIATE_URL"],
-      api_key: ENV["WEAVIATE_API_KEY"]
-    )
+    client = Argus::Clients::Weaviate.client
 
-    client.schema.delete_class("DiscordMessage")
+    client.schema.delete(class_name: "DiscordAnnouncementMessage")
   end
 end
