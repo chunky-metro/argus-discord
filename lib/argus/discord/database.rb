@@ -15,33 +15,50 @@ module Argus
         )
       end
 
-      def store_message(content:, author:, channel:, timestamp:, guild:)
+      def save_message(channel_id, author_id, content)
         client.objects.create(
           class_name: "DiscordMessage",
           properties: {
             content: content,
-            author: author,
-            channel: channel,
-            timestamp: timestamp,
-            guild: guild
+            channel_id: channel_id,
+            author_id: author_id,
+            timestamp: Time.now.to_i
           }
         )
       end
 
-      def query_messages(query, limit: 5)
+      def get_messages_for_date_range(channel_id, start_time, end_time)
         client.objects.get(
           class_name: "DiscordMessage",
-          fields: ["content", "author", "channel", "timestamp", "guild"],
+          fields: ["content", "author_id", "timestamp"],
           where: {
             operator: "And",
             operands: [
               {
-                path: ["content"],
-                operator: "Like",
-                valueString: query
+                path: ["channel_id"],
+                operator: "Equal",
+                valueString: channel_id
+              },
+              {
+                path: ["timestamp"],
+                operator: "GreaterThanEqual",
+                valueInt: start_time.to_i
+              },
+              {
+                path: ["timestamp"],
+                operator: "LessThan",
+                valueInt: end_time.to_i
               }
             ]
-          },
+          }
+        )
+      end
+
+      def search_similar_messages(content, limit: 5)
+        client.objects.get(
+          class_name: "DiscordMessage",
+          fields: ["content", "author_id", "timestamp"],
+          near_text: { concepts: [content] },
           limit: limit
         )
       end

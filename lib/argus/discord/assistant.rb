@@ -1,62 +1,72 @@
 # frozen_string_literal: true
 
+require "openai"
+require_relative "config"
+
 module Argus
   module Discord
     class Assistant
-      attr_reader :database, :llm, :importance_calculator, :message_fetcher
-
-      def initialize(database, llm, importance_calculator: nil, message_fetcher: nil)
-        @database = database
-        @llm = llm
-        @importance_calculator = importance_calculator || DefaultImportanceCalculator.new
-        @message_fetcher = message_fetcher || DefaultMessageFetcher.new(@database)
-      end
-
-      def process_message(message)
-        embedding = llm.embed(message.content)
-        importance = importance_calculator.calculate(embedding)
-        database.save_message(message)
-        {embedding: embedding, importance: importance}
-      end
-
-      def generate_summary(time_range: :daily)
-        messages = message_fetcher.fetch(time_range)
-        llm.summarize(messages.join("\n"))
-      end
-
-      def answer_question(question)
-        llm.rag_chat(question, [
-          {role: "system", content: "You are a helpful assistant that answers questions about crypto projects and potential airdrops based on the given context."},
-          {role: "user", content: question}
-        ])
-      end
-
-      def analyze_project_update(project_name, update_content)
-        query = "Latest updates about #{project_name}"
-        llm.rag_chat(query, [
-          {role: "system", content: "You are an expert in analyzing crypto projects and identifying potential airdrop opportunities. Analyze the following update and provide insights on its importance and any potential airdrop implications."},
-          {role: "user", content: "Project: #{project_name}\nUpdate: #{update_content}"}
-        ])
-      end
-    end
-
-    class DefaultImportanceCalculator
-      def calculate(embedding)
-        # Implement actual logic here
-        rand
-      end
-    end
-
-    class DefaultMessageFetcher
-      attr_reader :database
+      attr_reader :database, :llm
 
       def initialize(database)
         @database = database
+        @llm = OpenAI::Client.new(access_token: Config.openai_api_key)
       end
 
-      def fetch(time_range)
-        # Implement actual logic here
-        []
+      def process_message(content)
+        importance = calculate_importance(content)
+        importance == :critical ? :critical : :normal
+      rescue => e
+        puts "Error processing message: #{e.message}"
+        puts e.backtrace.join("\n")
+        :normal
+      end
+
+      def generate_daily_summary
+        start_time = Time.now - 24 * 60 * 60  # 24 hours ago
+        end_time = Time.now
+        messages = database.get_messages_for_date_range(start_time, end_time)
+        
+        return nil if messages.empty?
+
+        prompt = "Summarize the following Discord messages from all channels in the last 24 hours:\n\n"
+        messages.each do |msg|
+          prompt += "#{Time.at(msg['timestamp']).strftime('%Y-%m-%d %H:%M:%S')} - Channel: #{msg['channel_id']} - #{msg['content']}\n"
+        end
+        prompt += "\nProvide a concise summary of the key points and any important announcements across all channels."
+
+        response = llm.chat(
+          parameters: {
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            max_tokens: 500
+          }
+        )
+
+        response.dig("choices", 0, "message", "content")
+      rescue => e
+        puts "Error generating daily summary: #{e.message}"
+        puts e.backtrace.join("\n")
+        nil
+      end
+
+      private
+
+      def calculate_importance(content)
+        prompt = "Analyze the following message and determine if it contains critically important information that requires immediate attention. Respond with 'CRITICAL' if it's critically important, or 'NORMAL' otherwise.\n\nMessage: #{content}"
+
+        response = llm.chat(
+          parameters: {
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.3,
+            max_tokens: 10
+          }
+        )
+
+        result = response.dig("choices", 0, "message", "content").to_s.strip.upcase
+        result == "CRITICAL" ? :critical : :normal
       end
     end
   end
