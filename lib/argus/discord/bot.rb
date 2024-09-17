@@ -31,7 +31,7 @@ module Argus
         bot.message do |event|
           begin
             # Save every message
-            database.save_message(event.channel.id, event.author.id, event.content)
+            database.save_message(event)
 
             # Process the message with the assistant
             importance = assistant.process_message(event.content)
