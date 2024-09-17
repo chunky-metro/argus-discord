@@ -1,28 +1,27 @@
 # frozen_string_literal: true
 
-require "langchain"
+require_relative "database"
 require_relative "config"
 
 module Argus
   module Discord
     class EmbeddingService
-      attr_reader :database, :embedder
+      attr_reader :database
 
-      def initialize(database)
-        @database = database
-        @embedder = Langchain::LLM::OpenAI.new(api_key: Config.openai_api_key)
+      def initialize
+        @database = Database.new
       end
 
       def embed_and_store_message(message)
-        embedding = embedder.embed(text: message.content)
-        database.store_message(
-          content: message.content,
-          author: message.author.username,
-          channel: message.channel.name,
-          timestamp: message.timestamp.to_s,
-          guild: message.server.name,
-          embedding: embedding
-        )
+        @database.save_message(message)
+      end
+
+      def search_similar_messages(content, limit: 5)
+        @database.search_similar_messages(content, limit: limit)
+      end
+
+      def get_messages_for_date_range(channel_id, start_time, end_time)
+        @database.get_messages_for_date_range(channel_id, start_time, end_time)
       end
     end
   end

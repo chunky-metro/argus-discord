@@ -4,8 +4,8 @@ A Discord bot for monitoring announcements and interacting with an LLM using Ret
 
 ## Features
 
-- Listens to Discord channels and saves messages to Weaviate vector database
-- Uses OpenAI and Langchain for intelligent processing and querying
+- Listens to Discord channels and saves messages to OpenAI's vector store
+- Uses OpenAI for intelligent processing and querying
 - Generates embeddings for messages and calculates importance
 - Provides summaries of recent messages
 - Answers questions based on stored message history
@@ -37,9 +37,6 @@ To run the bot, create a `.env` file with the following environment variables:
 ```plaintext
 DISCORD_BOT_TOKEN=your_discord_bot_token
 OPENAI_API_KEY=your_openai_api_key
-WEAVIATE_URL=your_weaviate_url
-WEAVIATE_API_KEY=your_weaviate_api_key
-VOYAGE_API_KEY=your_voyage_api_key
 ```
 
 Then, run the bot with:
@@ -48,7 +45,7 @@ Then, run the bot with:
 $ argus-discord
 ```
 
-The bot will listen to the specified Discord channels, save messages to Weaviate, and interact with the LLM as needed.
+The bot will listen to the specified Discord channels, save messages to OpenAI's vector store, and interact with the LLM as needed.
 
 ## Deployment
 

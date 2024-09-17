@@ -19,8 +19,5 @@ RSpec.configure do |config|
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with("DISCORD_BOT_TOKEN").and_return("mock_discord_token")
     allow(ENV).to receive(:[]).with("OPENAI_API_KEY").and_return("mock_openai_key")
-    allow(ENV).to receive(:[]).with("WEAVIATE_URL").and_return("mock_weaviate_url")
-    allow(ENV).to receive(:[]).with("WEAVIATE_API_KEY").and_return("mock_weaviate_key")
-    allow(ENV).to receive(:[]).with("VOYAGE_API_KEY").and_return("mock_voyage_key")
   end
 end

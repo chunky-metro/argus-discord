@@ -1,0 +1,55 @@
+{
+  "id": "123456789012345678",
+  "channel_id": "987654321098765432",
+  "author": {
+    "id": "111222333444555666",
+    "username": "TestUser",
+    "discriminator": "1234",
+    "avatar": "abcdef0123456789"
+  },
+  "content": "This is a test message with embeds",
+  "timestamp": "2023-09-21T12:00:00.000000+00:00",
+  "edited_timestamp": null,
+  "tts": false,
+  "mention_everyone": false,
+  "mentions": [],
+  "mention_roles": [],
+  "attachments": [],
+  "embeds": [
+    {
+      "title": "Test Embed",
+      "type": "rich",
+      "description": "This is a test embed description",
+      "url": "https://example.com",
+      "timestamp": "2023-09-21T12:00:00.000000+00:00",
+      "color": 7506394,
+      "footer": {
+        "text": "Embed Footer",
+        "icon_url": "https://example.com/footer-icon.png"
+      },
+      "image": {
+        "url": "https://example.com/image.png"
+      },
+      "thumbnail": {
+        "url": "https://example.com/thumbnail.png"
+      },
+      "author": {
+        "name": "Embed Author",
+        "url": "https://example.com/author",
+        "icon_url": "https://example.com/author-icon.png"
+      },
+      "fields": [
+        {
+          "name": "Field 1",
+          "value": "This is the value of field 1",
+          "inline": true
+        },
+        {
+          "name": "Field 2",
+          "value": "This is the value of field 2",
+          "inline": false
+        }
+      ]
+    }
+  ]
+}
