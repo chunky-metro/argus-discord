@@ -2,6 +2,8 @@
 
 require "discordrb"
 require "date"
+require "json"
+require "yaml"
 require_relative "config"
 require_relative "database"
 require_relative "assistant"
@@ -9,10 +11,11 @@ require_relative "assistant"
 module Argus
   module Discord
     class Bot
+
       attr_reader :bot, :database, :assistant
 
       def initialize
-        @bot = Discordrb::Bot.new(token: Config.discord_bot_token)
+        @bot = Discordrb::Bot.new(token: Config.discord_bot_token, log_mode: :debug, fancy_log: true)
         puts "This bot's invite URL is #{bot.invite_url}"
         puts 'Click on it to invite it to your server.'
         @database = Database.new
@@ -21,7 +24,7 @@ module Argus
 
       def run
         setup_message_handler
-        setup_daily_summary
+     #   setup_daily_summary
         bot.run
       end
 
@@ -29,15 +32,18 @@ module Argus
 
       def setup_message_handler
         bot.message do |event|
+          next unless event.channel.category.start_with?("incoming-data")
           begin
             # Save every message
-            database.save_message(event)
+            Logger.info("new message:", event.inspect)
+            
+            database.create(event)
 
             # Process the message with the assistant
             importance = assistant.process_message(event.content)
 
             if importance == :critical
-              event.respond("@here Critical information detected: #{event.content}")
+              event.respond("@here alfa detected: #{event.content}")
             end
           rescue => e
             puts "Error processing message: #{e.message}"

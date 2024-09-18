@@ -9,7 +9,7 @@ require_relative "discord/database"
 require_relative "discord/llm"
 require_relative "discord/logger"
 require_relative "discord/assistant"
-require_relative "discord/embedding_service"
+require_relative "discord/message"
 
 module Argus
   module Discord

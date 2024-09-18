@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "dotenv"
+require "dotenv/load"
 
 module Argus
   module Discord
@@ -21,7 +21,7 @@ module Argus
         def openai_vector_store_id
           ENV.fetch("OPENAI_VECTOR_STORE_ID") { raise "ENV['OPENAI_VECTOR_STORE_ID'] is not set" }
         end
-        
+
         def root_path
           @root_path ||= File.expand_path('../../..', __dir__)
         end
