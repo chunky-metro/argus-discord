@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'argus/discord'
+require 'irb'
+require "dotenv/load"
+
+# Initialize the bot
+bot = Argus::Discord::Bot.new
+
+# Start the bot in a separate thread
+bot_thread = Thread.new { bot.run }
+
+# Give the bot a moment to initialize
+sleep 1
+
+puts "Bot is now running. You can interact with it using the 'bot' variable."
+puts "To stop the bot and exit, use the command: bot.stop"
+
+# Set up the IRB context
+binding.irb
+
+# Stop the bot when IRB exits
+bot.stop
+bot_thread.join

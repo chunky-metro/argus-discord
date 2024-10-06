@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["rhiza@shitposti.ng"]
 
   spec.summary = "A Discord bot for monitoring announcements and interacting with an LLM using RAG."
-  spec.description = "This bot listens to Discord channels, saves messages to Weaviate, and uses OpenAI and Langchain for intelligent processing and querying."
+  spec.description = "This bot listens to Discord channels, saves messages to OpenAI's vector store, and uses OpenAI for intelligent processing and querying."
   spec.homepage = "https://github.com/chunky-metro/argus-discord"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
@@ -31,8 +31,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "discordrb", "~> 3.5"
   spec.add_dependency "dotenv", "~> 3.1"
   spec.add_dependency "ruby-openai", "~> 7.1"
-  spec.add_dependency "langchainrb", "~> 0.15.4"
-  spec.add_dependency "weaviate-ruby", "~> 0.9.0"
 
   spec.add_development_dependency "rake", "~> 13.2"
   spec.add_development_dependency "rspec", "~> 3.13"

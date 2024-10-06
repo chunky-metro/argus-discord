@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require "weaviate"
+require "openai"
+require "json"
 require_relative "config"
 
 module Argus
@@ -9,41 +10,37 @@ module Argus
       attr_reader :client
 
       def initialize
-        @client = Weaviate::Client.new(
-          url: Config.weaviate_url,
-          api_key: Config.weaviate_api_key
-        )
+        @client = OpenAI::Client.new(access_token: Config.openai_api_key)
       end
 
-      def store_message(content:, author:, channel:, timestamp:, guild:)
-        client.objects.create(
-          class_name: "DiscordMessage",
-          properties: {
-            content: content,
-            author: author,
-            channel: channel,
-            timestamp: timestamp,
-            guild: guild
-          }
+      def create(message_event)
+        file = upload(Argus::Discord::Message.new(message_event))
+
+        vector_store_file = client.vector_store_files.create(
+          vector_store_id: Config.openai_vector_store_id,
+          parameters: { file_id: file["id"] }
         )
+
+        vector_store_file
       end
 
-      def query_messages(query, limit: 5)
-        client.objects.get(
-          class_name: "DiscordMessage",
-          fields: ["content", "author", "channel", "timestamp", "guild"],
-          where: {
-            operator: "And",
-            operands: [
-              {
-                path: ["content"],
-                operator: "Like",
-                valueString: query
-              }
-            ]
-          },
-          limit: limit
-        )
+    private
+
+      def upload(message)
+        temp_file = Tempfile.new(['upload', '.md'])
+        begin
+          temp_file.write(message)
+          temp_file.rewind
+
+          client.files.upload(
+            parameters: { file: temp_file.path, purpose: "assistants" }
+          )
+        rescue
+          Logger.error("Could not upload file")
+        ensure
+          temp_file.close
+          temp_file.unlink
+        end
       end
     end
   end

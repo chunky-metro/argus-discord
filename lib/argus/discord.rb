@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "weaviate"
+require "openai"
 
 require_relative "discord/version"
 require_relative "discord/config"
@@ -9,7 +9,7 @@ require_relative "discord/database"
 require_relative "discord/llm"
 require_relative "discord/logger"
 require_relative "discord/assistant"
-require_relative "discord/embedding_service"
+require_relative "discord/message"
 
 module Argus
   module Discord
@@ -19,5 +19,4 @@ module Argus
       Bot.new.run
     end
   end
-
 end

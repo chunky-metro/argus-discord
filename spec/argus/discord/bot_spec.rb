@@ -1,30 +1,40 @@
 # frozen_string_literal: true
 
-require "spec_helper"
+require 'spec_helper'
+require 'argus/discord/bot'
+require 'argus/discord/database'
+require 'argus/discord/assistant'
 
 RSpec.describe Argus::Discord::Bot do
-  let(:client) { instance_double(Discordrb::Bot) }
-  let(:database) { instance_double(Argus::Discord::Database) }
-  let(:assistant) { instance_double(Argus::Discord::Assistant) }
-  let(:bot) { described_class.new(client: client, token: "test_token", database: database, assistant: assistant) }
+  describe '#run' do
+    context 'when processing a normal message' do
+      before do
+        allow(event).to receive(:content).and_return('Hello, world!')
+        allow(assistant).to receive(:process_message).and_return(:normal)
+      end
 
-  describe "#initialize" do
-    it "sets up the bot with correct dependencies" do
-      expect(bot.client).to eq(client)
-      expect(bot.database).to eq(database)
-      expect(bot.assistant).to eq(assistant)
+      it 'saves the message and processes it without responding' do
+        expect(database).to receive(:save_message).with(instance_double(Discordrb::Message))
+        expect(assistant).to receive(:process_message).with('Hello, world!')
+        expect(event).not_to receive(:respond)
+
+        subject.run
+      end
     end
 
-    it "initializes command handlers" do
-      expect(client).to receive(:message).at_least(:once)
-      described_class.new(client: client, token: "test_token", database: database, assistant: assistant)
-    end
-  end
+    context 'when processing a critical message' do
+      before do
+        allow(event).to receive(:content).and_return('URGENT: System failure!')
+        allow(assistant).to receive(:process_message).and_return(:critical)
+      end
 
-  describe "#run" do
-    it "runs the Discord client" do
-      expect(client).to receive(:run)
-      bot.run
+      it 'saves the message, processes it, and responds with a critical alert' do
+        expect(database).to receive(:save_message).with(123, 456, 'URGENT: System failure!')
+        expect(assistant).to receive(:process_message).with('URGENT: System failure!')
+        expect(event).to receive(:respond).with('@here Critical information detected: URGENT: System failure!')
+
+        subject.run
+      end
     end
   end
 end

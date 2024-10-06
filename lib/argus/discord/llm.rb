@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "langchain"
 require_relative "config"
 
 module Argus
@@ -9,7 +8,7 @@ module Argus
       attr_reader :client, :embedder, :database
 
       def initialize
-        @client = Langchain::LLM::OpenAI.new(api_key: Config.openai_api_key)
+        @client = OpenAI::Client.new(api_key: Config.openai_api_key)
         @embedder = client
         @database = Database.new
       end

@@ -1,37 +1,85 @@
 # frozen_string_literal: true
 
 require "discordrb"
+require "date"
+require "json"
+require "yaml"
 require_relative "config"
 require_relative "database"
-require_relative "llm"
 require_relative "assistant"
-require_relative "embedding_service"
-require_relative "handler_service"
 
 module Argus
   module Discord
     class Bot
-      attr_reader :bot, :database, :llm, :assistant, :embedding_service, :handlers
+
+      attr_reader :bot, :database, :assistant
 
       def initialize
-        @bot = Discordrb::Bot.new(token: Config.discord_bot_token)
+        @bot = Discordrb::Bot.new(token: Config.discord_bot_token, log_mode: :debug, fancy_log: true)
         puts "This bot's invite URL is #{bot.invite_url}"
         puts 'Click on it to invite it to your server.'
         @database = Database.new
-        @llm = LLM.new
-        @assistant = Assistant.new(database, llm)
-        @embedding_service = EmbeddingService.new(database)
-        @handlers = HandlerService.new(bot, database, assistant, embedding_service)
+        @assistant = Assistant.new(@database)
       end
 
       def run
-        handlers.setup
+        setup_message_handler
+     #   setup_daily_summary
         bot.run
       end
 
-      def shutdown
-        Logger.info("Shutting down Argus Discord bot...")
-        bot.stop
+      private
+
+      def setup_message_handler
+        bot.message do |event|
+          next unless event.channel.category.start_with?("incoming-data")
+          begin
+            # Save every message
+            Logger.info("new message:", event.inspect)
+            
+            database.create(event)
+
+            # Process the message with the assistant
+            importance = assistant.process_message(event.content)
+
+            if importance == :critical
+              event.respond("@here alfa detected: #{event.content}")
+            end
+          rescue => e
+            puts "Error processing message: #{e.message}"
+            puts e.backtrace.join("\n")
+          end
+        end
+      end
+
+      def setup_daily_summary
+        Thread.new do
+          loop do
+            sleep_until_next_day
+            generate_summary
+          end
+        end
+      end
+
+      def generate_summary
+        argus_channel = bot.find_channel("argus")
+        if argus_channel
+          begin
+            summary = assistant.generate_daily_summary
+            argus_channel.send_message(summary) if summary
+          rescue => e
+            puts "Error generating summary for #argus channel: #{e.message}"
+            puts e.backtrace.join("\n")
+          end
+        else
+          puts "Error: #argus channel not found"
+        end
+      end
+
+      def sleep_until_next_day
+        tomorrow = Date.today + 1
+        seconds_until_tomorrow = (tomorrow.to_time - Time.now).to_i
+        sleep(seconds_until_tomorrow)
       end
     end
   end
